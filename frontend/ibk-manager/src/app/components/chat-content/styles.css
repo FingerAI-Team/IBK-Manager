@@ -1,0 +1,62 @@
+/* 레이아웃 */
+.chat-content-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.chat-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+/* 검색 필터 영역 */
+.search-filters {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--spacing-md);
+}
+
+/* MUI 컴포넌트 스타일 오버라이드 */
+.search-form-control {
+  min-width: 120px;
+}
+
+.search-button {
+  height: 40px;
+}
+
+/* 테이블 스타일 */
+.chat-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.stock-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.stock-badge-true {
+  color: var(--ibk-blue);
+}
+
+.stock-badge-false {
+  color: var(--text-secondary);
+}
+
+/* CSS 변수 */
+:root {
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --border-color: rgba(0, 0, 0, 0.12);
+  --ibk-blue: #0051A4;
+  --text-secondary: rgba(0, 0, 0, 0.6);
+} 

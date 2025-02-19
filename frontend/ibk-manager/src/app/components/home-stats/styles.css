@@ -1,0 +1,69 @@
+/* 레이아웃 */
+.home-stats-container {
+  width: 100%;
+}
+
+.date-selector-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.stats-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 카드 스타일 */
+.stats-card {
+  height: 100%;
+}
+
+.stats-card-content {
+  padding: 1rem;
+}
+
+/* 차트 컨테이너 */
+.chart-container {
+  height: 200px;
+  width: 100%;
+}
+
+/* 예측 결과 스타일 */
+.prediction-results {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.prediction-item {
+  text-align: center;
+}
+
+.accuracy-text {
+  margin-top: 0.5rem;
+}
+
+/* 클릭 비율 차트 스타일 */
+.click-ratio-chart {
+  height: 200px;
+}
+
+/* 날짜 선택기 스타일 */
+.date-picker {
+  min-width: 200px;
+} 
