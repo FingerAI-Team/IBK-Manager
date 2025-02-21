@@ -1,31 +1,55 @@
+'use client';
+
 import { Card, CardContent, Typography, FormControl, InputLabel, Select, MenuItem } from "@mui/material"
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { useState } from 'react'
-
-const userChatData = [
-  { userId: "User 1", chats: 150 },
-  { userId: "User 2", chats: 120 },
-  { userId: "User 3", chats: 100 },
-  { userId: "User 4", chats: 90 },
-  { userId: "User 5", chats: 80 },
-  { userId: "User 6", chats: 70 },
-  { userId: "User 7", chats: 60 },
-  { userId: "User 8", chats: 50 },
-  { userId: "User 9", chats: 40 },
-  { userId: "User 10", chats: 30 },
-  // ... 더 많은 데이터 추가 가능
-]
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import { useState, useEffect } from 'react'
+import { getUserRankingData } from '@/app/api/chat-analytics';
+import type { UserRankingData } from '@/app/api/chat-analytics/types';
 
 export function UserRanking() {
-  const [period, setPeriod] = useState('daily')
-  const [displayCount, setDisplayCount] = useState(10)
-  const [sortOrder, setSortOrder] = useState('desc')
+  const [period, setPeriod] = useState('daily');
+  const [startDate, setStartDate] = useState<Dayjs | null>(null);
+  const [endDate, setEndDate] = useState<Dayjs | null>(null);
+  const [displayCount, setDisplayCount] = useState(10);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [chartData, setChartData] = useState<UserRankingData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const sortedData = [...userChatData]
-    .sort((a, b) => 
-      sortOrder === 'desc' ? b.chats - a.chats : a.chats - b.chats
-    )
-    .slice(0, displayCount)
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getUserRankingData(
+        period, 
+        displayCount, 
+        sortOrder,
+        startDate?.format('YYYY-MM-DD'),
+        endDate?.format('YYYY-MM-DD')
+      );
+      if (response.success) {
+        setChartData(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user ranking data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [period, displayCount, sortOrder, startDate, endDate]);
+
+  const handlePeriodChange = (value: string) => {
+    setPeriod(value);
+    if (value !== 'custom') {
+      setStartDate(null);
+      setEndDate(null);
+    }
+  };
 
   return (
     <Card>
@@ -33,16 +57,35 @@ export function UserRanking() {
         <div className="chart-header">
           <Typography variant="h6">사용자별 대화 횟수 TOP {displayCount}</Typography>
           <div className="chart-controls">
+            {period === 'custom' && (
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <div className="date-picker-group">
+                  <DatePicker 
+                    label="시작일" 
+                    value={startDate}
+                    onChange={setStartDate}
+                    maxDate={endDate || undefined}
+                  />
+                  <DatePicker 
+                    label="종료일" 
+                    value={endDate}
+                    onChange={setEndDate}
+                    minDate={startDate || undefined}
+                  />
+                </div>
+              </LocalizationProvider>
+            )}
             <FormControl className="form-control">
               <InputLabel>기간</InputLabel>
               <Select 
                 label="기간" 
                 value={period}
-                onChange={(e) => setPeriod(e.target.value)}
+                onChange={(e) => handlePeriodChange(e.target.value)}
               >
                 <MenuItem value="daily">일간</MenuItem>
                 <MenuItem value="weekly">주간</MenuItem>
                 <MenuItem value="monthly">월간</MenuItem>
+                <MenuItem value="custom">기간 지정</MenuItem>
               </Select>
             </FormControl>
             <FormControl className="form-control">
@@ -63,7 +106,7 @@ export function UserRanking() {
               <Select 
                 label="정렬 순서" 
                 value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
+                onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
               >
                 <MenuItem value="desc">많은 순</MenuItem>
                 <MenuItem value="asc">적은 순</MenuItem>
@@ -72,24 +115,51 @@ export function UserRanking() {
           </div>
         </div>
         <div className="chart-container chart-container-large">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart 
-              data={sortedData}
-              className="chart"
-            >
-              <XAxis dataKey="userId" />
-              <YAxis />
-              <Tooltip 
-                formatter={(value) => [`${value}회`, "대화 횟수"]}
-                wrapperClassName="chart-tooltip"
-              />
-              <Bar 
-                dataKey="chats" 
-                fill="var(--ibk-blue)"
-                name="대화 횟수"
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          {isLoading ? (
+            <div className="loading-container">
+              <Typography>데이터를 불러오는 중...</Typography>
+            </div>
+          ) : chartData.length === 0 ? (
+            <div className="empty-container">
+              <Typography>
+                {period === 'custom' 
+                  ? '해당 기간에'
+                  : period === 'daily' 
+                    ? '오늘의' 
+                    : period === 'weekly' 
+                      ? '이번 주' 
+                      : '이번 달'}
+                <br />
+                사용자 활동 데이터가 없습니다
+              </Typography>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart 
+                data={chartData}
+                className="chart"
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <XAxis 
+                  dataKey="userName"
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value) => [`${value}회`, "대화 횟수"]}
+                  wrapperClassName="chart-tooltip"
+                />
+                <Bar 
+                  dataKey="chats" 
+                  fill="var(--ibk-blue)"
+                  name="대화 횟수"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -1,45 +1,51 @@
+'use client';
+
 import { Card, CardContent, Typography, FormControl, InputLabel, Select, MenuItem } from "@mui/material"
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { useState } from 'react'
-
-const hourlyData = [
-  { hour: "00", chats: 50 },
-  { hour: "01", chats: 30 },
-  { hour: "02", chats: 20 },
-  { hour: "03", chats: 10 },
-  { hour: "04", chats: 5 },
-  { hour: "05", chats: 15 },
-  { hour: "06", chats: 25 },
-  { hour: "07", chats: 45 },
-  { hour: "08", chats: 80 },
-  { hour: "09", chats: 120 },
-  { hour: "10", chats: 150 },
-  { hour: "11", chats: 180 },
-  { hour: "12", chats: 200 },
-  { hour: "13", chats: 190 },
-  { hour: "14", chats: 170 },
-  { hour: "15", chats: 160 },
-  { hour: "16", chats: 140 },
-  { hour: "17", chats: 130 },
-  { hour: "18", chats: 100 },
-  { hour: "19", chats: 90 },
-  { hour: "20", chats: 70 },
-  { hour: "21", chats: 60 },
-  { hour: "22", chats: 40 },
-  { hour: "23", chats: 35 }
-]
+import dayjs, { Dayjs } from 'dayjs';
+import { useState, useEffect } from 'react';
+import { getHourlyChartData } from '@/app/api/chat-analytics';
+import type { HourlyChartData } from '@/app/api/chat-analytics/types';
 
 export function HourlyChart() {
-  const [dateType, setDateType] = useState('today')
-  const [showDatePickers, setShowDatePickers] = useState(false)
+  const [dateType, setDateType] = useState('today');
+  const [startDate, setStartDate] = useState<Dayjs | null>(null);
+  const [endDate, setEndDate] = useState<Dayjs | null>(null);
+  const [chartData, setChartData] = useState<HourlyChartData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getHourlyChartData(
+        dateType,
+        startDate?.format('YYYY-MM-DD'),
+        endDate?.format('YYYY-MM-DD')
+      );
+      if (response.success) {
+        setChartData(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch hourly chart data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [dateType, startDate, endDate]);
 
   const handleDateTypeChange = (value: string) => {
-    setDateType(value)
-    setShowDatePickers(value === 'custom')
-  }
+    setDateType(value);
+    if (value !== 'custom') {
+      setStartDate(null);
+      setEndDate(null);
+    }
+  };
 
   return (
     <Card>
@@ -47,11 +53,21 @@ export function HourlyChart() {
         <div className="chart-header">
           <Typography variant="h6">시간대별 대화량</Typography>
           <div className="chart-controls">
-            {showDatePickers && (
+            {dateType === 'custom' && (
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <div className="date-picker-group">
-                  <DatePicker label="시작일" />
-                  <DatePicker label="종료일" />
+                  <DatePicker 
+                    label="시작일" 
+                    value={startDate}
+                    onChange={setStartDate}
+                    maxDate={endDate || undefined}
+                  />
+                  <DatePicker 
+                    label="종료일" 
+                    value={endDate}
+                    onChange={setEndDate}
+                    minDate={startDate || undefined}
+                  />
                 </div>
               </LocalizationProvider>
             )}
@@ -72,17 +88,48 @@ export function HourlyChart() {
           </div>
         </div>
         <div className="chart-container">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={hourlyData} className="chart">
-              <XAxis dataKey="hour" />
-              <YAxis />
-              <Tooltip 
-                formatter={(value) => [`${value}회`, "대화 수"]}
-                wrapperClassName="chart-tooltip"
-              />
-              <Bar dataKey="chats" fill="var(--ibk-blue)" name="대화 수" />
-            </BarChart>
-          </ResponsiveContainer>
+          {isLoading ? (
+            <div className="loading-container">
+              <Typography>데이터를 불러오는 중...</Typography>
+            </div>
+          ) : chartData.length === 0 ? (
+            <div className="empty-container">
+              <Typography>
+                {dateType === 'custom' 
+                  ? `${startDate?.format('YYYY.MM.DD')} ~ ${endDate?.format('YYYY.MM.DD')} 기간에`
+                  : dateType === 'today' 
+                    ? '오늘'
+                    : dateType === 'yesterday'
+                      ? '어제'
+                      : dateType === 'thisWeek'
+                        ? '이번 주'
+                        : '이번 달'
+                }
+                <br />
+                수집된 데이터가 없습니다
+              </Typography>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} className="chart">
+                <XAxis 
+                  dataKey="hour" 
+                  tickFormatter={(value) => `${value}시`}
+                />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value) => [`${value}회`, "대화 수"]}
+                  labelFormatter={(label) => `${label}시`}
+                  wrapperClassName="chart-tooltip"
+                />
+                <Bar 
+                  dataKey="chats" 
+                  fill="var(--ibk-blue)" 
+                  name="대화 수"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>

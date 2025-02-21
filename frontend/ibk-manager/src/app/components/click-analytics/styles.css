@@ -38,7 +38,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .date-picker-group {
@@ -54,28 +54,55 @@
 }
 
 .legend-item {
-  margin: 0 1.25rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
-.legend-item-clicks {
+.legend-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.legend-item.active {
+  background-color: rgba(0, 0, 0, 0.08);
+  font-weight: bold;
+}
+
+.legend-item-clicks.active {
   color: var(--ibk-blue);
 }
 
-.legend-item-chats {
+.legend-item-chats.active {
   color: var(--success-green);
 }
 
 /* 비율 차트 영역 */
-.ratio-charts-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
+.ratio-charts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 500px;
 }
 
-@media (min-width: 768px) {
-  .ratio-charts-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.ratio-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  position: relative;
+  min-height: 400px;
+}
+
+/* 로딩/빈 데이터 컨테이너 스타일 수정 */
+.ratio-charts-grid .loading-container,
+.ratio-charts-grid .empty-container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 100%;
+  grid-column: 1 / -1; /* 그리드 전체 너비 사용 */
 }
 
 .ratio-chart-container {

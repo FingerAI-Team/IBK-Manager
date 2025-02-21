@@ -1,27 +1,14 @@
+'use client';
+
 import { Card, CardContent, Typography } from "@mui/material"
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import { useState, useMemo } from 'react';
-
-// 2주치 더미 데이터 생성
-const generateTwoWeeksData = () => {
-  const today = dayjs();
-  const twoWeeksAgo = today.subtract(13, 'day');
-  
-  return Array.from({ length: 14 }, (_, i) => {
-    const currentDate = twoWeeksAgo.add(i, 'day');
-    return {
-      date: currentDate.format('YYYY-MM-DD'),
-      chats: Math.floor(Math.random() * 500) + 200,  // 200~700 사이 랜덤값
-      users: Math.floor(Math.random() * 300) + 100,  // 100~400 사이 랜덤값
-    };
-  });
-};
-
-const chatData = generateTwoWeeksData();
+import { useState, useEffect } from 'react';
+import { getDailyChartData } from '@/app/api/chat-analytics';
+import type { DailyChartData } from '@/app/api/chat-analytics/types';
 
 const COLORS = {
   chats: 'var(--ibk-blue)',
@@ -31,6 +18,29 @@ const COLORS = {
 export function DailyChart() {
   const [startDate, setStartDate] = useState<Dayjs>(dayjs().subtract(13, 'day'));
   const [endDate, setEndDate] = useState<Dayjs>(dayjs());
+  const [chartData, setChartData] = useState<DailyChartData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getDailyChartData(
+        startDate.format('YYYY-MM-DD'),
+        endDate.format('YYYY-MM-DD')
+      );
+      if (response.success) {
+        setChartData(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch daily chart data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [startDate, endDate]);
 
   const handleStartDateChange = (newValue: Dayjs | null) => {
     if (newValue) {
@@ -43,15 +53,6 @@ export function DailyChart() {
       setEndDate(newValue);
     }
   };
-
-  // 선택된 날짜 범위에 따라 데이터 필터링
-  const filteredData = useMemo(() => {
-    return chatData.filter(item => {
-      const itemDate = dayjs(item.date);
-      return itemDate.isAfter(startDate, 'day') || itemDate.isSame(startDate, 'day') &&
-             (itemDate.isBefore(endDate, 'day') || itemDate.isSame(endDate, 'day'));
-    });
-  }, [startDate, endDate]);
 
   return (
     <Card>
@@ -76,25 +77,53 @@ export function DailyChart() {
           </div>
         </div>
         <div className="chart-container">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={filteredData} className="chart">
-              <XAxis 
-                dataKey="date" 
-                tickFormatter={(value) => dayjs(value).format('MM/DD')}
-              />
-              <YAxis />
-              <Tooltip 
-                formatter={(value, name) => [
-                  `${value}${name === "users" ? "명" : "회"}`, 
-                  name === "users" ? "사용자 수" : "대화 수"
-                ]}
-                labelFormatter={(label) => dayjs(label).format('YYYY-MM-DD')}
-                wrapperClassName="chart-tooltip"
-              />
-              <Line type="monotone" dataKey="chats" stroke={COLORS.chats} name="chats" dot={false} strokeWidth={2} />
-              <Line type="monotone" dataKey="users" stroke={COLORS.users} name="users" dot={false} strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+          {isLoading ? (
+            <div className="loading-container">
+              <Typography>데이터를 불러오는 중...</Typography>
+            </div>
+          ) : chartData.length === 0 ? (
+            <div className="empty-container">
+              <Typography>
+                {startDate.format('YYYY.MM.DD')} ~ {endDate.format('YYYY.MM.DD')} 기간에
+                <br />
+                수집된 데이터가 없습니다
+              </Typography>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} className="chart">
+                <XAxis 
+                  dataKey="date" 
+                  tickFormatter={(value) => dayjs(value).format('MM/DD')}
+                />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value, name) => [
+                    `${value}${name === "users" ? "명" : "회"}`, 
+                    name === "users" ? "사용자 수" : "대화 수"
+                  ]}
+                  labelFormatter={(label) => dayjs(label).format('YYYY-MM-DD')}
+                  wrapperClassName="chart-tooltip"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="chats" 
+                  stroke={COLORS.chats} 
+                  name="chats" 
+                  dot={false} 
+                  strokeWidth={2} 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="users" 
+                  stroke={COLORS.users} 
+                  name="users" 
+                  dot={false} 
+                  strokeWidth={2} 
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>

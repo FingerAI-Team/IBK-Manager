@@ -3,28 +3,62 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import SearchIcon from '@mui/icons-material/Search';
+import { useState } from 'react';
+import type { Dayjs } from 'dayjs';
 
-export function SearchFilters() {
+interface SearchFiltersProps {
+  onSearch: (filters: SearchFilters) => void;
+}
+
+export interface SearchFilters {
+  startDate: string | null;
+  endDate: string | null;
+  isStock: string;
+  userId: string;
+  keyword: string;
+}
+
+export function SearchFilters({ onSearch }: SearchFiltersProps) {
+  const [startDate, setStartDate] = useState<Dayjs | null>(null);
+  const [endDate, setEndDate] = useState<Dayjs | null>(null);
+  const [isStock, setIsStock] = useState('all');
+  const [userId, setUserId] = useState('');
+  const [keyword, setKeyword] = useState('');
+
+  const handleSearch = () => {
+    onSearch({
+      startDate: startDate?.format('YYYY-MM-DD') || null,
+      endDate: endDate?.format('YYYY-MM-DD') || null,
+      isStock,
+      userId,
+      keyword
+    });
+  };
+
   return (
     <div className="search-filters">
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DatePicker label="시작일" />
-        <DatePicker label="종료일" />
+        <DatePicker 
+          label="시작일" 
+          value={startDate}
+          onChange={setStartDate}
+          slotProps={{ textField: { size: 'small' } }}
+        />
+        <DatePicker 
+          label="종료일"
+          value={endDate}
+          onChange={setEndDate}
+          slotProps={{ textField: { size: 'small' } }}
+        />
       </LocalizationProvider>
       
-      <FormControl className="search-form-control">
-        <InputLabel>사용자</InputLabel>
-        <Select label="사용자" defaultValue="all">
-          <MenuItem value="all">전체</MenuItem>
-          <MenuItem value="user_1">user_1</MenuItem>
-          <MenuItem value="user_2">user_2</MenuItem>
-          <MenuItem value="user_3">user_3</MenuItem>
-        </Select>
-      </FormControl>
-
-      <FormControl className="search-form-control">
+      <FormControl size="small" className="search-form-control">
         <InputLabel>종목 여부</InputLabel>
-        <Select label="종목 여부" defaultValue="all">
+        <Select 
+          label="종목 여부" 
+          value={isStock}
+          onChange={(e) => setIsStock(e.target.value)}
+        >
           <MenuItem value="all">전체</MenuItem>
           <MenuItem value="stock">종목</MenuItem>
           <MenuItem value="non-stock">일반</MenuItem>
@@ -32,8 +66,19 @@ export function SearchFilters() {
       </FormControl>
 
       <TextField 
+        label="사용자 ID" 
+        size="small" 
+        value={userId}
+        onChange={(e) => setUserId(e.target.value)}
+        placeholder="사용자 ID 입력"
+        className="search-user-input"
+      />
+
+      <TextField 
         label="키워드 검색" 
         size="small" 
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
         placeholder="검색어 입력"
       />
 
@@ -41,6 +86,7 @@ export function SearchFilters() {
         variant="contained" 
         startIcon={<SearchIcon />}
         className="search-button"
+        onClick={handleSearch}
       >
         검색
       </Button>

@@ -1,70 +1,82 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination } from "@mui/material"
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, CircularProgress } from "@mui/material"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { useState } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react'
+import { fetchChatList } from '@/app/api/chat'
+import { SearchFilters } from './search-filters'
+import type { ChatData } from '@/app/api/chat'
 
-const chatData = [
-  {
-    id: 1,
-    timestamp: "2024-02-01",
-    userId: "user_1",
-    question: "삼성전자 전망 어떻게 보나요?",
-    isStock: true,
-  },
-  {
-    id: 2,
-    userId: "user_2",
-    question: "ETF 투자할 때 고려해야 할 점?",
-    timestamp: "2024-02-02",
-    isStock: true,
-  },
-  {
-    id: 3,
-    userId: "user_3",
-    question: "오늘 날씨 어떤가요?",
-    timestamp: "2024-02-03",
-    isStock: false,
-  },
-  {
-    id: 4,
-    userId: "user_4",
-    question: "다음달 여행 가려면 어디가 좋을까요?",
-    timestamp: "2024-02-04",
-    isStock: false,
-  },
-  {
-    id: 5,
-    userId: "user_5",
-    question: "카카오 주식 지금 매수해도 될까요?",
-    timestamp: "2024-02-05",
-    isStock: true,
-  },
-  {
-    id: 6,
-    userId: "user_6",
-    question: "S&P 500 ETF를 추천받고 싶어요.",
-    timestamp: "2024-02-06",
-    isStock: true,
-  }
-]
+export const ChatTable = forwardRef<
+  { loadChatData: (filters: SearchFilters) => void },
+  Record<string, never>
+>((props, ref) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [chatData, setChatData] = useState<ChatData[]>([]);
+  const [currentFilters, setCurrentFilters] = useState<SearchFilters | null>(null);
 
-export function ChatTable() {
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const loadChatData = useCallback(async (filters: SearchFilters, pageNum = 0) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setCurrentFilters(filters);
+      const response = await fetchChatList(filters, pageNum, rowsPerPage);
+      setChatData(response.items);
+      setTotal(response.total);
+    } catch (error) {
+      console.error('Failed to fetch chat data:', error);
+      setError('데이터 조회에 실패했습니다. 조회 기간을 확인해 주세요.');
+      setChatData([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [rowsPerPage]);
+
+  useImperativeHandle(ref, () => ({
+    loadChatData: (filters: SearchFilters) => {
+      setPage(0); // 새로운 검색시 첫 페이지로
+      loadChatData(filters, 0);
+    }
+  }));
 
   const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
+    if (!currentFilters) return;
+    setPage(newPage);
+    loadChatData(currentFilters, newPage); // 현재 필터와 새 페이지 번호로 데이터 로드
+  };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
+    if (!currentFilters) return;
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0);
+    loadChatData(currentFilters, 0); // 페이지 크기 변경시 첫 페이지로
+  };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+        <CircularProgress />
+      </div>
+    );
   }
 
-  const currentPageData = chatData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  )
+  if (error) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        padding: '2rem',
+        color: '#d32f2f'
+      }}>
+        {error}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -79,44 +91,57 @@ export function ChatTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {currentPageData.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.timestamp}</TableCell>
-                <TableCell>{row.userId}</TableCell>
-                <TableCell>{row.question}</TableCell>
-                <TableCell>
-                  <div className={`stock-badge stock-badge-${row.isStock}`}>
-                    {row.isStock ? (
-                      <>
-                        <CheckCircleIcon fontSize="small" />
-                        <span>종목</span>
-                      </>
-                    ) : (
-                      <>
-                        <CancelIcon fontSize="small" />
-                        <span>일반</span>
-                      </>
-                    )}
-                  </div>
+            {chatData.length > 0 ? (
+              chatData.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell>{row.timestamp}</TableCell>
+                  <TableCell>{row.userId}</TableCell>
+                  <TableCell>{row.question}</TableCell>
+                  <TableCell>
+                    <div className={`stock-badge stock-badge-${row.isStock}`}>
+                      {row.isStock ? (
+                        <>
+                          <CheckCircleIcon fontSize="small" />
+                          <span>종목</span>
+                        </>
+                      ) : (
+                        <>
+                          <CancelIcon fontSize="small" />
+                          <span>일반</span>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  검색 결과가 없습니다.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        component="div"
-        count={chatData.length}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-        labelRowsPerPage="페이지당 행 수:"
-        labelDisplayedRows={({ from, to, count }) => 
-          `${from}-${to} / 전체 ${count}`
-        }
-      />
+      <div className="table-footer">
+        <div className="required-notice">* 조회 기간은 필수 입력 항목입니다.</div>
+        <TablePagination
+          component="div"
+          count={total}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 10, 25]}
+          labelRowsPerPage="페이지당 행 수:"
+          labelDisplayedRows={({ from, to, count }) => 
+            `${from}-${to} / 전체 ${count}`
+          }
+        />
+      </div>
     </>
-  )
-} 
+  );
+});
+
+ChatTable.displayName = 'ChatTable';

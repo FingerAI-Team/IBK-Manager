@@ -2,10 +2,15 @@ import { Card, CardContent, Typography } from "@mui/material"
 import dayjs, { Dayjs } from 'dayjs'
 
 interface PredictionCountProps {
-  selectedDate: Dayjs
+  selectedDate: dayjs.Dayjs;
+  predictionStats: {
+    correct: number;
+    incorrect: number;
+    accuracy: number;
+  };
 }
 
-export function PredictionCount({ selectedDate }: PredictionCountProps) {
+export function PredictionCount({ selectedDate, predictionStats }: PredictionCountProps) {
   const isYesterday = selectedDate.isSame(dayjs().subtract(1, 'day'), 'day')
 
   return (
@@ -16,20 +21,20 @@ export function PredictionCount({ selectedDate }: PredictionCountProps) {
         </Typography>
         <div className="prediction-results">
           <div className="prediction-item">
-            <Typography variant="h4" color="#2E7D32">789</Typography>
+            <Typography variant="h4" color="#2E7D32">{predictionStats.correct}</Typography>
             <Typography variant="body2" color="text.secondary">
               O인 답변 수
             </Typography>
           </div>
           <div className="prediction-item">
-            <Typography variant="h4" color="#D32F2F">123</Typography>
+            <Typography variant="h4" color="#D32F2F">{predictionStats.incorrect}</Typography>
             <Typography variant="body2" color="text.secondary">
               X인 답변 수
             </Typography>
           </div>
         </div>
         <Typography variant="body2" color="text.secondary" className="accuracy-text">
-          정확도: 86.5%
+          정확도: {predictionStats.accuracy}%
         </Typography>
       </CardContent>
     </Card>
