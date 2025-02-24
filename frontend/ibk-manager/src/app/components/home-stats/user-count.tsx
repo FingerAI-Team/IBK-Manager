@@ -16,9 +16,11 @@ export function UserCount({ selectedDate, count, diffPercent }: UserCountProps) 
         <Typography variant="h6" gutterBottom>
           {isYesterday ? '전일' : selectedDate.format('MM/DD')} 사용자 수
         </Typography>
-        <Typography variant="h4">{count.toLocaleString()}</Typography>
+        <Typography variant="h4">
+          {(count ?? 0).toLocaleString()}
+        </Typography>
         <Typography variant="body2" color="text.secondary">
-          이전 영업일 대비 {diffPercent >= 0 ? '+' : ''}{diffPercent}%
+          이전 영업일 대비 {diffPercent >= 0 ? '+' : ''}{diffPercent ?? 0}%
         </Typography>
       </CardContent>
     </Card>

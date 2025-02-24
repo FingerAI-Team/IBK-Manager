@@ -13,7 +13,7 @@ interface ChatResponse {
   total: number;
 }
 
-const API_BASE_URL = 'http://localhost:8000';  // API 서버 주소 추가
+const API_BASE_URL = 'http://localhost:3005';  // API 서버 주소 추가
 
 export async function fetchChatList(
   filters: SearchFilters, 

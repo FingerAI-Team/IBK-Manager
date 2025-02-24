@@ -1,7 +1,7 @@
 import { ApiResponse, UserClickRankingResponse, ClickRatioResponse } from './types';
 import { fetchWithAuth } from '@/utils/fetch';
 
-const BASE_URL = 'http://localhost:8000/api/click-analytics';
+const BASE_URL = 'http://localhost:3005/api/click-analytics';
 
 // 사용자별 클릭/대화 데이터 조회
 export async function getUserClickRanking(

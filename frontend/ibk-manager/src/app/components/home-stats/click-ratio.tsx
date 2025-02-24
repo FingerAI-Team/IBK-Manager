@@ -28,9 +28,21 @@ interface ClickRatioProps {
 
 export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
   const isYesterday = selectedDate.isSame(dayjs().subtract(1, 'day'), 'day');
+  const defaultRatio = { count: 0, ratio: 0 };
+  
   const clickData: ChartDataItem[] = [
-    { name: '클릭', symbol: 'O', value: clickRatio.click.ratio, count: clickRatio.click.count },
-    { name: '미클릭', symbol: 'X', value: clickRatio.nonClick.ratio, count: clickRatio.nonClick.count },
+    { 
+      name: '클릭', 
+      symbol: 'O', 
+      value: clickRatio?.click?.ratio ?? 0, 
+      count: clickRatio?.click?.count ?? 0 
+    },
+    { 
+      name: '미클릭', 
+      symbol: 'X', 
+      value: clickRatio?.nonClick?.ratio ?? 0, 
+      count: clickRatio?.nonClick?.count ?? 0 
+    },
   ];
 
   const isEmpty = clickData.every(item => item.count === 0);

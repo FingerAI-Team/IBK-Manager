@@ -1,7 +1,7 @@
 import { ApiResponse, DailyChartResponse, HourlyChartResponse, WeekdayChartResponse, UserRankingResponse } from './types';
 import { fetchWithAuth } from '@/utils/fetch';
 
-const BASE_URL = 'http://localhost:8000/api/chat-analytics';
+const BASE_URL = 'http://localhost:3005/api/chat-analytics';
 
 // 일별 차트 데이터 조회
 export async function getDailyChartData(startDate: string, endDate: string): Promise<ApiResponse<DailyChartResponse>> {

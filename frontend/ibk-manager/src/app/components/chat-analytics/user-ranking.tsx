@@ -51,6 +51,16 @@ export function UserRanking() {
     }
   };
 
+  const handleBarClick = (data: UserRankingData) => {
+    navigator.clipboard.writeText(data.userName)
+      .then(() => {
+        alert(`사용자 이름이 복사되었습니다.`);
+      })
+      .catch(err => {
+        console.error('클립보드 복사 실패:', err);
+      });
+  };
+
   return (
     <Card>
       <CardContent>
@@ -156,6 +166,8 @@ export function UserRanking() {
                   dataKey="chats" 
                   fill="var(--ibk-blue)"
                   name="대화 횟수"
+                  onClick={handleBarClick}
+                  style={{ cursor: 'pointer' }}
                 />
               </BarChart>
             </ResponsiveContainer>

@@ -102,6 +102,16 @@ export function UserRanking() {
 
   const axisConfig = calculateAxisConfig(allData);
 
+  const handleBarClick = (data: UserClickData) => {
+    navigator.clipboard.writeText(data.userName)
+      .then(() => {
+        alert(`사용자 이름이 복사되었습니다.`);
+      })
+      .catch(err => {
+        console.error('클립보드 복사 실패:', err);
+      });
+  };
+
   return (
     <Card>
       <CardContent>
@@ -172,6 +182,8 @@ export function UserRanking() {
                   dataKey="clicks"
                   fill={COLORS.clicks}
                   name="클릭 수"
+                  onClick={handleBarClick}
+                  style={{ cursor: 'pointer' }}
                 />
                 <Tooltip formatter={(value) => Math.abs(value) + '회'} />
               </BarChart>
@@ -204,6 +216,8 @@ export function UserRanking() {
                   dataKey="chats"
                   fill={COLORS.chats}
                   name="대화 수"
+                  onClick={handleBarClick}
+                  style={{ cursor: 'pointer' }}
                 />
                 <Tooltip formatter={(value) => value + '회'} />
               </BarChart>

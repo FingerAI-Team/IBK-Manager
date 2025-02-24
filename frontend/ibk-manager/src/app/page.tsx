@@ -16,11 +16,11 @@ export default function Home() {
         <Image
           src="/img/ibk_logo.png"
           alt="IBK 로고"
-          width={120}
-          height={120}
+          width={150}
+          height={150}
           className="object-contain"
         />
-        <h1 className="text-4xl font-bold text-[#0051A4]">관리자 화면</h1>
+        <h1 className="text-3xl font-bold text-[#0051A4] ml-auto">관리자 화면</h1>
       </div>
       <Tabs>
         <TabList>

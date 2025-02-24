@@ -24,7 +24,7 @@ export function HomeStats() {
         const response = await homeApi.getDailyStats({
           date: selectedDate.format('YYYY-MM-DD')
         })
-        setStats(response.data)
+        setStats(response)
       } catch (err) {
         if (axios.isAxiosError(err)) {
           setError(
@@ -58,21 +58,21 @@ export function HomeStats() {
         <div className="stats-grid">
           <ChatCount 
             selectedDate={selectedDate}
-            count={stats.data.chatCount}
-            diffPercent={stats.data.chatCountDiff}
+            count={stats.chatCount}
+            diffPercent={stats.chatCountDiff}
           />
           <UserCount 
             selectedDate={selectedDate}
-            count={stats.data.userCount}
-            diffPercent={stats.data.userCountDiff}
+            count={stats.userCount}
+            diffPercent={stats.userCountDiff}
           />
           <ClickRatio 
             selectedDate={selectedDate}
-            clickRatio={stats.data.clickRatio}
+            clickRatio={stats.clickRatio}
           />
           <PredictionCount 
             selectedDate={selectedDate}
-            predictionStats={stats.data.predictionStats}
+            predictionStats={stats.predictionStats}
           />
         </div>
       ) : null}

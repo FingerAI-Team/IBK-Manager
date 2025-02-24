@@ -21,20 +21,24 @@ export function PredictionCount({ selectedDate, predictionStats }: PredictionCou
         </Typography>
         <div className="prediction-results">
           <div className="prediction-item">
-            <Typography variant="h4" color="#2E7D32">{predictionStats.correct}</Typography>
+            <Typography variant="h4" color="#2E7D32">
+              {predictionStats?.correct ?? 0}
+            </Typography>
             <Typography variant="body2" color="text.secondary">
               O인 답변 수
             </Typography>
           </div>
           <div className="prediction-item">
-            <Typography variant="h4" color="#D32F2F">{predictionStats.incorrect}</Typography>
+            <Typography variant="h4" color="#D32F2F">
+              {predictionStats?.incorrect ?? 0}
+            </Typography>
             <Typography variant="body2" color="text.secondary">
               X인 답변 수
             </Typography>
           </div>
         </div>
         <Typography variant="body2" color="text.secondary" className="accuracy-text">
-          정확도: {predictionStats.accuracy}%
+          정확도: {predictionStats?.accuracy ?? 0}%
         </Typography>
       </CardContent>
     </Card>

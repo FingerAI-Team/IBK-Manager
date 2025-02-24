@@ -23,6 +23,9 @@ app.include_router(chat_analytics.router)
 app.include_router(click_analytics.router)
 app.include_router(chats.router)
 
+# 서버 설정을 config.py로 이동
+PORT = 3005
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run("app.main:app", host="0.0.0.0", port=PORT, reload=True) 
