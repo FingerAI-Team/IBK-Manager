@@ -13,7 +13,7 @@ interface ChatResponse {
   total: number;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';  // API 서버 주소 추가
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://ibkai.fingerservice.co.kr/api';  // API 서버 주소 추가
 export async function fetchChatList(
   filters: SearchFilters, 
   page: number = 0, 
