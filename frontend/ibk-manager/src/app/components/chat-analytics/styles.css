@@ -75,7 +75,15 @@
 .empty-container {
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: var(--chart-text);
+}
+
+/* 차트 알림 메시지 */
+.chart-notice {
+  text-align: center;
+  margin-top: var(--spacing-sm);
   color: var(--chart-text);
 } 

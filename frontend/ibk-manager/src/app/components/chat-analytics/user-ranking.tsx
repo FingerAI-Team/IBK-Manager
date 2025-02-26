@@ -18,10 +18,20 @@ export function UserRanking() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [chartData, setChartData] = useState<UserRankingData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiSuccess, setApiSuccess] = useState(true);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
+      
+      // custom 기간이고 날짜가 선택되지 않은 경우는 성공으로 처리
+      if (period === 'custom' && (!startDate || !endDate)) {
+        setApiSuccess(true);
+        setChartData([]);
+        setIsLoading(false);
+        return;
+      }
+      
       const response = await getUserRankingData(
         period, 
         displayCount, 
@@ -29,11 +39,17 @@ export function UserRanking() {
         startDate?.format('YYYY-MM-DD'),
         endDate?.format('YYYY-MM-DD')
       );
+      
+      setApiSuccess(response.success);
       if (response.success) {
         setChartData(response.data.data);
+      } else {
+        setChartData([]);
       }
     } catch (error) {
       console.error('Failed to fetch user ranking data:', error);
+      setApiSuccess(false);
+      setChartData([]);
     } finally {
       setIsLoading(false);
     }
@@ -51,14 +67,56 @@ export function UserRanking() {
     }
   };
 
-  const handleBarClick = (data: UserRankingData) => {
-    navigator.clipboard.writeText(data.userName)
-      .then(() => {
+  const handleBarClick = (data: any) => {
+    // 데이터가 비어있거나 userName이 없는 경우 무시
+    if (!data || !data.userName) {
+      return;
+    }
+    
+    const userName = data.userName;
+    
+    // 클립보드 API 지원 여부 확인
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(userName)
+        .then(() => {
+          alert(`사용자 이름이 복사되었습니다.`);
+        })
+        .catch(err => {
+          console.error('클립보드 복사 실패:', err);
+          fallbackCopyTextToClipboard(userName);
+        });
+    } else {
+      // 클립보드 API를 지원하지 않는 경우 대체 방법 사용
+      fallbackCopyTextToClipboard(userName);
+    }
+  };
+  
+  // 대체 클립보드 복사 방법
+  const fallbackCopyTextToClipboard = (text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // 화면 밖으로 위치시킴
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
         alert(`사용자 이름이 복사되었습니다.`);
-      })
-      .catch(err => {
-        console.error('클립보드 복사 실패:', err);
-      });
+      } else {
+        alert('클립보드 복사에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('Fallback 클립보드 복사 실패:', err);
+      alert('클립보드 복사에 실패했습니다.');
+    }
+    
+    document.body.removeChild(textArea);
   };
 
   return (
@@ -129,24 +187,16 @@ export function UserRanking() {
             <div className="loading-container">
               <Typography>데이터를 불러오는 중...</Typography>
             </div>
-          ) : chartData.length === 0 ? (
+          ) : !apiSuccess ? (
             <div className="empty-container">
               <Typography>
-                {period === 'custom' 
-                  ? '해당 기간에'
-                  : period === 'daily' 
-                    ? '오늘의' 
-                    : period === 'weekly' 
-                      ? '이번 주' 
-                      : '이번 달'}
-                <br />
-                사용자 활동 데이터가 없습니다
+                데이터 조회에 실패했습니다.
               </Typography>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart 
-                data={chartData}
+                data={chartData.length === 0 ? [{ userName: '', chats: 0 }] : chartData}
                 className="chart"
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
@@ -169,6 +219,21 @@ export function UserRanking() {
                   onClick={handleBarClick}
                   style={{ cursor: 'pointer' }}
                 />
+                {(chartData.length === 0 || chartData.every(item => item.chats === 0)) && (
+                  <text 
+                    x="50%" 
+                    y="50%" 
+                    textAnchor="middle" 
+                    dominantBaseline="middle"
+                    style={{ fontSize: '16px', fontWeight: 'normal' }}
+                  >
+                    {period === 'daily' ? '오늘 데이터는 오후 1시 이후 조회 가능합니다.' : 
+                     period === 'custom' && (!startDate || !endDate) ? '시작일과 종료일을 모두 선택해주세요.' :
+                     period === 'custom' ? '해당 기간에 사용자 활동 데이터가 없습니다' :
+                     period === 'weekly' ? '이번 주 사용자 활동 데이터가 없습니다' : 
+                     '이번 달 사용자 활동 데이터가 없습니다'}
+                  </text>
+                )}
               </BarChart>
             </ResponsiveContainer>
           )}

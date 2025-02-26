@@ -65,18 +65,22 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
     const innerX = cx + innerRadius2 * Math.cos(-midAngle * RADIAN);
     const innerY = cy + innerRadius2 * Math.sin(-midAngle * RADIAN);
     
-    const outerRadius2 = outerRadius * 1.3;
+    const outerRadius2 = outerRadius * 1.5;
     let outerX = cx + outerRadius2 * Math.cos(-midAngle * RADIAN);
     let outerY = cy + outerRadius2 * Math.sin(-midAngle * RADIAN);
     
-    if (outerY < cy) {
-      outerY += 15;
+    if (index === 1) {
+      outerY -= 30;
+    } else {
+      if (outerY < cy) {
+        outerY += 20;
+      }
     }
 
     if (outerX > cx) {
-      outerX += 10;
+      outerX += 15;
     } else {
-      outerX -= 10;
+      outerX -= 15;
     }
 
     const data = clickData[index];
@@ -148,14 +152,14 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
               데이터가 없습니다
             </Typography>
           ) : (
-            <ResponsiveContainer width="100%" height={180}>
+            <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
                   data={clickData}
                   cx="50%"
                   cy="50%"
                   innerRadius={0}
-                  outerRadius={50}
+                  outerRadius={70}
                   dataKey="value"
                   nameKey="name"
                   paddingAngle={2}

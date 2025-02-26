@@ -16,20 +16,36 @@ export function HourlyChart() {
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [chartData, setChartData] = useState<HourlyChartData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiSuccess, setApiSuccess] = useState(true);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
+      
+      // custom 기간이고 날짜가 선택되지 않은 경우는 성공으로 처리
+      if (dateType === 'custom' && (!startDate || !endDate)) {
+        setApiSuccess(true);
+        setChartData([]);
+        setIsLoading(false);
+        return;
+      }
+      
       const response = await getHourlyChartData(
         dateType,
         startDate?.format('YYYY-MM-DD'),
         endDate?.format('YYYY-MM-DD')
       );
+      
+      setApiSuccess(response.success);
       if (response.success) {
         setChartData(response.data.data);
+      } else {
+        setChartData([]);
       }
     } catch (error) {
       console.error('Failed to fetch hourly chart data:', error);
+      setApiSuccess(false);
+      setChartData([]);
     } finally {
       setIsLoading(false);
     }
@@ -92,26 +108,15 @@ export function HourlyChart() {
             <div className="loading-container">
               <Typography>데이터를 불러오는 중...</Typography>
             </div>
-          ) : chartData.length === 0 ? (
+          ) : !apiSuccess ? (
             <div className="empty-container">
               <Typography>
-                {dateType === 'custom' 
-                  ? `${startDate?.format('YYYY.MM.DD')} ~ ${endDate?.format('YYYY.MM.DD')} 기간에`
-                  : dateType === 'today' 
-                    ? '오늘'
-                    : dateType === 'yesterday'
-                      ? '어제'
-                      : dateType === 'thisWeek'
-                        ? '이번 주'
-                        : '이번 달'
-                }
-                <br />
-                수집된 데이터가 없습니다
+                데이터 조회에 실패했습니다.
               </Typography>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} className="chart">
+              <BarChart data={chartData.length === 0 ? [{ hour: '00', chats: 0 }] : chartData} className="chart">
                 <XAxis 
                   dataKey="hour" 
                   tickFormatter={(value) => `${value}시`}
@@ -127,6 +132,28 @@ export function HourlyChart() {
                   fill="var(--ibk-blue)" 
                   name="대화 수"
                 />
+                <text 
+                    x="50%" 
+                    y="50%" 
+                    textAnchor="middle" 
+                    dominantBaseline="middle"
+                    style={{ fontSize: '16px', fontWeight: 'normal' }}
+                  >
+                  {dateType === 'custom' && (!startDate || !endDate)
+                    ? '시작일과 종료일을 모두 선택해주세요.'
+                    : dateType === 'custom' && chartData.every(item => item.chats === 0)
+                      ? `해당 기간에 수집된 데이터가 없습니다`
+                      : dateType === 'yesterday' && chartData.every(item => item.chats === 0)
+                        ? '어제 수집된 데이터가 없습니다'
+                        : dateType === 'thisWeek' && chartData.every(item => item.chats === 0)
+                          ? '이번 주 수집된 데이터가 없습니다'
+                          : dateType === 'today' && chartData.every(item => item.chats === 0)
+                            ? '오늘 데이터는 오후 1시 이후 조회 가능합니다.'
+                            : dateType === 'thisMonth' && chartData.every(item => item.chats === 0)
+                              ? '이번 달 수집된 데이터가 없습니다'
+                              : ''
+                  }
+                </text>
               </BarChart>
             </ResponsiveContainer>
           )}

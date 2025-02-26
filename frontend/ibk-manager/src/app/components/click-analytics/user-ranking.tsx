@@ -102,14 +102,56 @@ export function UserRanking() {
 
   const axisConfig = calculateAxisConfig(allData);
 
-  const handleBarClick = (data: UserClickData) => {
-    navigator.clipboard.writeText(data.userName)
-      .then(() => {
+  const handleBarClick = (data: any) => {
+    // 데이터가 비어있거나 userName이 없는 경우 무시
+    if (!data || !data.userName) {
+      return;
+    }
+    
+    const userName = data.userName;
+    
+    // 클립보드 API 지원 여부 확인
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(userName)
+        .then(() => {
+          alert(`사용자 이름이 복사되었습니다.`);
+        })
+        .catch(err => {
+          console.error('클립보드 복사 실패:', err);
+          fallbackCopyTextToClipboard(userName);
+        });
+    } else {
+      // 클립보드 API를 지원하지 않는 경우 대체 방법 사용
+      fallbackCopyTextToClipboard(userName);
+    }
+  };
+  
+  // 대체 클립보드 복사 방법
+  const fallbackCopyTextToClipboard = (text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // 화면 밖으로 위치시킴
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
         alert(`사용자 이름이 복사되었습니다.`);
-      })
-      .catch(err => {
-        console.error('클립보드 복사 실패:', err);
-      });
+      } else {
+        alert('클립보드 복사에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('Fallback 클립보드 복사 실패:', err);
+      alert('클립보드 복사에 실패했습니다.');
+    }
+    
+    document.body.removeChild(textArea);
   };
 
   return (

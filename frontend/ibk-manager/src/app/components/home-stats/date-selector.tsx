@@ -43,7 +43,7 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
         label="날짜 선택"
         value={selectedDate}
         onChange={handleDateChange}
-        maxDate={dayjs().subtract(1, 'day')}
+        maxDate={dayjs()} // 오늘 날짜까지 선택 가능
         shouldDisableDate={(date) => !isBusinessDay(date)}
         format="YYYY-MM-DD (ddd)"
       />

@@ -15,31 +15,51 @@ export function PredictionCount({ selectedDate, predictionStats }: PredictionCou
 
   return (
     <Card className="stats-card">
-      <CardContent className="stats-card-content">
-        <Typography variant="h6" gutterBottom>
+      <CardContent className="stats-card-content" sx={{ padding: '16px 16px 16px' }}>
+        <Typography variant="h6" gutterBottom className="stats-title">
           {isYesterday ? '전일' : selectedDate.format('MM/DD')} 예측 결과
         </Typography>
         <div className="prediction-results">
           <div className="prediction-item">
-            <Typography variant="h4" color="#2E7D32">
-              {predictionStats?.correct ?? 0}
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: "#2E7D32", 
+                fontWeight: "bold", 
+                fontSize: "2.5rem",
+                marginBottom: "0.5rem" 
+              }} 
+              className="prediction-item-text"
+            >
+              O
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              O인 답변 수
+            <Typography variant="h4" color="#2E7D32" className="prediction-item-value">
+              {predictionStats?.correct ?? 0}
             </Typography>
           </div>
           <div className="prediction-item">
-            <Typography variant="h4" color="#D32F2F">
-              {predictionStats?.incorrect ?? 0}
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: "#D32F2F", 
+                fontWeight: "bold", 
+                fontSize: "2.5rem",
+                marginBottom: "0.5rem" 
+              }} 
+              className="prediction-item-text"
+            >
+              X
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              X인 답변 수
+            <Typography variant="h4" color="#D32F2F" className="prediction-item-value">
+              {predictionStats?.incorrect ?? 0}
             </Typography>
           </div>
         </div>
-        <Typography variant="body2" color="text.secondary" className="accuracy-text">
-          정확도: {predictionStats?.accuracy ?? 0}%
-        </Typography>
+        <div style={{ marginTop: '0px', marginBottom: '30px' }}>
+          <Typography variant="body2" color="text.secondary" className="accuracy-text" sx={{ margin: 0 }}>
+            정확도: {predictionStats?.accuracy ?? 0}%
+          </Typography>
+        </div>
       </CardContent>
     </Card>
   )
