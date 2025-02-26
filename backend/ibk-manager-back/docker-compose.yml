@@ -1,16 +1,20 @@
-version: '3.8'
-
 services:
-  backend:
-    build: .
+  ibk-manager-backendi:
+    container_name: ibk-manager-backend
+    image: ibk-manager-backend:latest  # 직접 빌드한 이미지 사용
     ports:
       - "3005:3005"
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-    restart: unless-stopped
     networks:
-      - app-network
+      - ibk-network
+    environment:
+      - PORT=3005
+      - DB_HOST=postgres_postgresql-master_1
+      - DB_NAME=ibk_db
+      - DB_USER=ibk-manager
+      - DB_PASSWORD=fingerai2024!
+      - DB_PORT=5432
+      - NODE_ENV=production
 
 networks:
-  app-network:
-    driver: bridge 
+  ibk-network:
+    external: true
