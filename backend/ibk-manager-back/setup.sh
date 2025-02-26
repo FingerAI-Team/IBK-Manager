@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # 가상환경 생성
-python3 -m venv venv
+python3 -m venv linux_venv
 
 # 가상환경 활성화 (Linux/Mac)
 if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
-  source venv/bin/activate
+  . linux_venv/bin/activate
 # 가상환경 활성화 (Windows)
 elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
   venv\Scripts\activate
