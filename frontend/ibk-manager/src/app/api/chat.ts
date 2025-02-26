@@ -34,7 +34,7 @@ export async function fetchChatList(
     if (!value) queryParams.delete(key);
   });
 
-  const response = await fetch(`${API_BASE_URL}/api/chats?${queryParams}`);
+  const response = await fetch(`${API_BASE_URL}/chats?${queryParams}`);
   
   if (!response.ok) {
     throw new Error('Failed to fetch chat list');
