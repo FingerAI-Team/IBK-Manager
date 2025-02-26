@@ -14,6 +14,7 @@ services:
       - DB_PASSWORD=fingerai2024!
       - DB_PORT=5432
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://ibk-manager:fingerai2024!@localhost/ibk_db
 
 networks:
   ibk-network:
