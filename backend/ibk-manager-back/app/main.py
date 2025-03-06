@@ -27,7 +27,7 @@ app.include_router(click_analytics.router)
 app.include_router(chats.router)
 
 # 서버 설정을 config.py로 이동
-PORT = 3005
+PORT = 3001
 
 if __name__ == "__main__":
     import uvicorn

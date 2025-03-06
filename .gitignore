@@ -1,4 +1,5 @@
 
 backend/ibk-manager-back/.env
 
-backend/
+backend/venv/
+backend/linux_venv/
