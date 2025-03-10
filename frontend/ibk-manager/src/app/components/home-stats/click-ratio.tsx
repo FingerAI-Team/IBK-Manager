@@ -48,27 +48,31 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
   const isEmpty = clickData.every(item => item.count === 0);
 
   const renderCustomizedLabel = (props: PieLabelRenderProps) => {
-    const { cx, cy, index } = props;
+    const { cx, cy, midAngle, innerRadius, outerRadius, index } = props;
     
     if (typeof cx !== 'number' || 
         typeof cy !== 'number' || 
+        typeof midAngle !== 'number' || 
+        typeof innerRadius !== 'number' || 
+        typeof outerRadius !== 'number' ||
         typeof index !== 'number') {
       return null;
     }
     
-    // 고정된 위치 계산
-    const radius = 85;  // 레이블까지의 거리
+    const RADIAN = Math.PI / 180;
     const data = clickData[index];
     if (!data) return null;
 
-    // O는 항상 왼쪽(-1), X는 항상 오른쪽(1)
+    // 내부 레이블 위치 (파이 차트 회전에 따라 변경)
+    const innerRadius2 = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const innerX = cx + innerRadius2 * Math.cos(-midAngle * RADIAN);
+    const innerY = cy + innerRadius2 * Math.sin(-midAngle * RADIAN);
+
+    // 외부 레이블 위치 (고정)
+    const radius = 85;
     const direction = index === 0 ? -1 : 1;
     const outerX = cx + (direction * radius);
     const outerY = cy;
-
-    // 내부 레이블 위치 (회전에 따라 변경)
-    const innerX = cx + (direction * 30);
-    const innerY = cy;
 
     return (
       <g key={`label-${index}`}>
