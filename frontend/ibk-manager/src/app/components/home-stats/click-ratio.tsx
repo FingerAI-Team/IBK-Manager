@@ -32,13 +32,13 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
   
   const clickData: ChartDataItem[] = [
     { 
-      name: '클릭', 
+      name: '종목 버튼 클릭', 
       symbol: 'O', 
       value: clickRatio?.click?.ratio ?? 0, 
       count: clickRatio?.click?.count ?? 0 
     },
     { 
-      name: '미클릭', 
+      name: '직접 질문 입력', 
       symbol: 'X', 
       value: clickRatio?.nonClick?.ratio ?? 0, 
       count: clickRatio?.nonClick?.count ?? 0 
@@ -65,22 +65,24 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
     const innerX = cx + innerRadius2 * Math.cos(-midAngle * RADIAN);
     const innerY = cy + innerRadius2 * Math.sin(-midAngle * RADIAN);
     
-    const outerRadius2 = outerRadius * 1.5;
+    const outerRadius2 = outerRadius * 1.4;
     let outerX = cx + outerRadius2 * Math.cos(-midAngle * RADIAN);
     let outerY = cy + outerRadius2 * Math.sin(-midAngle * RADIAN);
     
-    if (index === 1) {
-      outerY -= 30;
-    } else {
+    if (index === 0) {
+      outerX -= 10;
       if (outerY < cy) {
-        outerY += 20;
+        outerY -= 10;
+      } else {
+        outerY += 10;
       }
-    }
-
-    if (outerX > cx) {
-      outerX += 15;
     } else {
-      outerX -= 15;
+      outerX += 10;
+      if (outerY < cy) {
+        outerY -= 10;
+      } else {
+        outerY += 10;
+      }
     }
 
     const data = clickData[index];
@@ -94,6 +96,7 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
           fill="#fff"
           textAnchor="middle"
           dominantBaseline="middle"
+          className="pie-chart-label-inner"
         >
           {data.count}회
         </text>
@@ -101,8 +104,9 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
           x={outerX}
           y={outerY}
           fill="#666"
-          textAnchor={outerX > cx ? "start" : "end"}
+          textAnchor={index === 0 ? "end" : "start"}
           dominantBaseline="middle"
+          className="pie-chart-label-outer"
         >
           {`${data.symbol} ${data.value}%`}
         </text>
@@ -135,7 +139,7 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
     <Card className="stats-card">
       <CardContent className="stats-card-content">
         <Typography variant="h6" gutterBottom>
-          {isYesterday ? '전일' : selectedDate.format('MM/DD')} 클릭 여부
+          {isYesterday ? '전일' : selectedDate.format('MM/DD')} 종목 버튼 클릭 여부
         </Typography>
         <div className="click-ratio-chart">
           {isEmpty ? (
@@ -153,19 +157,21 @@ export function ClickRatio({ selectedDate, clickRatio }: ClickRatioProps) {
             </Typography>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
+              <PieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
                 <Pie
                   data={clickData}
                   cx="50%"
                   cy="50%"
                   innerRadius={0}
-                  outerRadius={70}
+                  outerRadius={60}
                   dataKey="value"
                   nameKey="name"
                   paddingAngle={2}
                   label={renderCustomizedLabel}
                   labelLine={true}
                   isAnimationActive={false}
+                  startAngle={90}
+                  endAngle={450}
                 >
                   {clickData.map((entry, index) => (
                     <Cell 

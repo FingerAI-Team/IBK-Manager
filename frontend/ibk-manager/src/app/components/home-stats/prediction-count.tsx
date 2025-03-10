@@ -57,7 +57,7 @@ export function PredictionCount({ selectedDate, predictionStats }: PredictionCou
         </div>
         <div style={{ marginTop: '0px', marginBottom: '30px' }}>
           <Typography variant="body2" color="text.secondary" className="accuracy-text" sx={{ margin: 0 }}>
-            정확도: {predictionStats?.accuracy ?? 0}%
+            종목 관련 예측 비율: {predictionStats?.accuracy ?? 0}%
           </Typography>
         </div>
       </CardContent>
