@@ -20,7 +20,7 @@ export default function Home() {
           height={150}
           className="object-contain"
         />
-        <h1 className="text-3xl font-bold text-[#0051A4] ml-auto">관리자 화면</h1>
+        {/* <h1 className="text-3xl font-bold text-[#0051A4] ml-auto">관리자 화면</h1> */}
       </div>
       <Tabs>
         <TabList>
