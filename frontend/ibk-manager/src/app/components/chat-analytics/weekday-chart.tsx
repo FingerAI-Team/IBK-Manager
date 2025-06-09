@@ -92,6 +92,7 @@ export function WeekdayChart() {
                     `${value}${name === "users" ? "명" : "회"}`,
                     name === "users" ? "사용자 수" : "대화 수"
                   ]}
+                  labelFormatter={(label) => `${label}`}
                   wrapperClassName="chart-tooltip"
                 />
                 <Bar 
