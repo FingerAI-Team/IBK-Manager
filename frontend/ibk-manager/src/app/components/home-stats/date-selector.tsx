@@ -27,8 +27,9 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
 
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
-      const businessDay = getBusinessDay(newDate)
-      setSelectedDate(businessDay)
+      // const businessDay = getBusinessDay(newDate) 자동 영업일 선택
+      // setSelectedDate(businessDay)
+      setSelectedDate(newDate)
     }
   }
 
@@ -42,7 +43,7 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
         className="date-picker"
         label="날짜 선택"
         value={selectedDate}
-        // onChange={handleDateChange} 자동 영업일 선택
+        onChange={handleDateChange} 
         maxDate={dayjs()} // 오늘 날짜까지 선택 가능
         // shouldDisableDate={(date) => !isBusinessDay(date)} 주말만 선택
         format="YYYY-MM-DD (ddd)"
