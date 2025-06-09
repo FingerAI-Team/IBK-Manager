@@ -88,22 +88,24 @@ export function WeekdayChart() {
                 <XAxis dataKey="day" />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value, name) => [
-                    `${value}${name === "users" ? "명" : "회"}`,
-                    name === "users" ? "사용자 수" : "대화 수"
-                  ]}
+                  formatter={(value: number, name: string) => {
+                    if (name === 'chats') {
+                      return [`${value}회`, '대화 수'];
+                    } else if (name === 'users') {
+                      return [`${value}명`, '사용자 수'];
+                    }
+                    return [value, name];
+                  }}
                   labelFormatter={(label) => `${label}`}
                   wrapperClassName="chart-tooltip"
                 />
                 <Bar 
                   dataKey="chats" 
-                  fill={COLORS.chats} 
-                  name="대화 수" 
+                  fill={COLORS.chats}
                 />
                 <Bar 
                   dataKey="users" 
-                  fill={COLORS.users} 
-                  name="사용자 수" 
+                  fill={COLORS.users}
                 />
               </BarChart>
             </ResponsiveContainer>
