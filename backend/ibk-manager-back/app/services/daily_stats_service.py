@@ -15,10 +15,10 @@ class DailyStatsService:
         return True
 
     def get_previous_business_day(self, date: datetime) -> datetime:
-        current_date = date - timedelta(days=1)
-        while not self.is_business_day(current_date):
-            current_date -= timedelta(days=1)
-        return current_date
+        previous_date = date - timedelta(days=1)
+        while not self.is_business_day(previous_date):
+            previous_date -= timedelta(days=1)
+        return previous_date
 
     def _get_date_stats(self, date: datetime) -> dict:
         try:
@@ -138,15 +138,16 @@ class DailyStatsService:
             if target_date.date() > datetime.now().date():
                 return {"success": False, "error": "Future date is not allowed"}
             
-            # 영업일 체크
-            if not self.is_business_day(target_date):
-                return {"success": False, "error": "Not a business day"}
+            # 영업일 체크 (필요 없어짐)
+            # if not self.is_business_day(target_date):
+            #     return {"success": False, "error": "Not a business day"}
 
             # 현재 날짜 통계
             current_stats = self._get_date_stats(target_date)
             
-            # 이전 영업일 통계
-            prev_date = self.get_previous_business_day(target_date)
+            # 이전 영업일 통계 (영업일 기준 필요 없어짐)
+            # prev_date = self.get_previous_business_day(target_date)
+            prev_date = target_date - timedelta(days=1)
             prev_stats = self._get_date_stats(prev_date)
 
             # 증감률 계산
