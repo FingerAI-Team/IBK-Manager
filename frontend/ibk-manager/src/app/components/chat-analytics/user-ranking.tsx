@@ -227,7 +227,7 @@ export function UserRanking() {
                     dominantBaseline="middle"
                     style={{ fontSize: '16px', fontWeight: 'normal' }}
                   >
-                    {period === 'daily' ? '오늘 데이터는 오후 1시 이후 조회 가능합니다.' : 
+                    {period === 'daily' ? '오늘 수집된 데이터가 없습니다' : 
                      period === 'custom' && (!startDate || !endDate) ? '시작일과 종료일을 모두 선택해주세요.' :
                      period === 'custom' ? '해당 기간에 사용자 활동 데이터가 없습니다' :
                      period === 'weekly' ? '이번 주 사용자 활동 데이터가 없습니다' : 

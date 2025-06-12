@@ -148,7 +148,7 @@ export function HourlyChart() {
                         : dateType === 'thisWeek' && chartData.every(item => item.chats === 0)
                           ? '이번 주 수집된 데이터가 없습니다'
                           : dateType === 'today' && chartData.every(item => item.chats === 0)
-                            ? '오늘 데이터는 오후 1시 이후 조회 가능합니다.'
+                            ? '오늘 수집된 데이터가 없습니다'
                             : dateType === 'thisMonth' && chartData.every(item => item.chats === 0)
                               ? '이번 달 수집된 데이터가 없습니다'
                               : ''
